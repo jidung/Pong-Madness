@@ -8,5 +8,5 @@ Created by JD Minwong Ji
 ##How to Run
 1. Download Processing (Processing.org)
 1. Download Pong-Mandess zip file and unzip it
-1. Open .pde file with Processing
+1. Open Pong_Madness_1.0.pde with Processing
 1. Click Run or Press Ctrl + R (Cmd+R if Mac)
