@@ -10,3 +10,5 @@ Created by JD Minwong Ji
 1. Download Pong-Mandess zip file and unzip it
 1. Open Pong_Madness_1.0.pde with Processing
 1. Click Run or Press Ctrl + R (Cmd+R if Mac)
+
+##You need to install oscP5 and netP5 library to run Pong Madness.
