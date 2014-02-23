@@ -1,15 +1,15 @@
 /*
 
-    Pong Madness
-
-    Ji Minoong (JD)
-    Digital Media Art Workshop (ANT3010)
-    Computer Science and Engineering
-    Sogang University
-    2013. 6. 19
-    
-    
-*/
+ Pong Madness
+ 
+ Ji Minoong (JD)
+ Digital Media Art Workshop (ANT3010)
+ Computer Science and Engineering
+ Sogang University
+ 2013. 6. 19
+ 
+ 
+ */
 
 
 
@@ -19,16 +19,16 @@ import netP5.*;
 Paddle paddle1;
 Paddle paddle2;
 int elements = 200 ;
-Ball ballarray[] = new Ball[elements];
 int score1 = 0;
 int score2 = 0;
 int speed = 3;
 int a = 0;
 int ballcount = elements;
-int phase = 0;
+int phaseState = 0;
 int mytimer = 0;
 boolean isCalled = false;
 boolean isAnyKeyPressed = false;
+Ball ballarray[] = new Ball[elements];
 
 // create the objects we need:
 OscP5 oscP5;
@@ -39,7 +39,7 @@ NetAddress myRemoteLocation;
 void setup() {
 
   ////////////////////////////////////////////////
-  /////////////////connect to MAX/////////////////
+  //////connect to MAX/MSP to generate sound//////
   ////////////////////////////////////////////////
 
   // start oscP5:
@@ -62,7 +62,7 @@ void setup() {
 
 
   size(600, 600);
-  phase = 0;
+  phaseState = 0;
   score1 = 0;
   score2 = 0;
   isAnyKeyPressed = false;
@@ -90,8 +90,8 @@ void someone_scored (Ball myball) {
   ballcount--;
 
   println(ballcount);
-  
-  
+
+
   //send max(score1,score2) to MAX/MSP
   OscMessage hitPaddleMsg = new OscMessage("/score");
   if (score1 >= score2)
@@ -168,18 +168,23 @@ class Ball {
     nextx = x + velx;
     nexty = y + vely;
 
-
+    // when the ball hit top or bottom
     if ( nexty < 0 || nexty > height ) {
-      vely *= -1.3; // or vely *= -1;
+      // accelerate
+      vely *= -1.3;
       velx *= 1.3;
     }
-
-    if ( nextx < 0 )
+    
+    // when the ball crossed the line
+    if ( nextx < 0 ) {  
       player_two_scored(this);
-    else if ( nextx > width )
+    }
+    else if ( nextx > width ) {
       player_one_scored(this);
-    else // ball is still in the court 
-    {  // collision detection with paddles
+    }
+    else // the ball is still in the court 
+    {  
+      // collision detection with paddles
       if ( x >= (paddle1.x + paddle1.pwidth/2) && nextx < (paddle1.x + paddle1.pwidth/2) ) {
         if ( nexty < paddle1.y + paddle1.pheight/2 + bwidth/2 && nexty > paddle1.y - paddle1.pheight/2 - bwidth/2 )
         {     
@@ -189,7 +194,6 @@ class Ball {
           oscP5.send(hitPaddleMsg, myRemoteLocation);
         }
       }
-
       else if ( x <= (paddle2.x - paddle2.pwidth/2) && nextx > (paddle2.x - paddle2.pwidth/2)) {
         if ( nexty < paddle2.y + paddle2.pheight/2 + bwidth/2 && nexty > paddle2.y - paddle2.pheight/2 - bwidth/2 )
         { 
@@ -200,6 +204,7 @@ class Ball {
         }
       }
     }
+    // renew ball's position
     x = nextx;
     y = nexty;
   }
@@ -228,7 +233,7 @@ void keyPressed() {
   }
 
   if (!isAnyKeyPressed) {  // starts game when any key is pressed
-    phase = 1;
+    phaseState = 1;
     isAnyKeyPressed = true; 
     mytimer = millis();
     // tell MAX patcher that the game has started
@@ -272,9 +277,8 @@ void drawScore() {
 
 void setPhase1 () {
 
-
   if (!isCalled) {
-
+    
     ballcount = 100;
     int angle = 150;
     for (int i = 0; i < ballcount / 2 ; i++ )
@@ -286,12 +290,9 @@ void setPhase1 () {
   isCalled = true;
 }
 
-
 void setPhase2 () {
 
-
   if (!isCalled) {
-
 
     ballcount = 100;
     int angle = 260;
@@ -303,7 +304,6 @@ void setPhase2 () {
   }
   isCalled = true;
 }
-
 
 void setPhase3 () {
 
@@ -333,7 +333,6 @@ void setPhase4 () {
 
 void setPhase5 () {
 
-
   if (!isCalled) {
 
     ballcount = 100;
@@ -347,11 +346,9 @@ void setPhase5 () {
   isCalled = true;
 }
 
-
 void setPhase6 () {
 
-
-  if (!isCalled) {
+ if (!isCalled) {
 
     ballcount = 100;
     int angle = 260;
@@ -363,7 +360,6 @@ void setPhase6 () {
   }
   isCalled = true;
 }
-
 
 void increaseAndSendA() {
 
@@ -383,6 +379,10 @@ void increaseAndSendA() {
   }
 }
 
+  ///////////////////////////////////////////////////
+  ////////////// DRAWING LOOP STARTS ////////////////
+  ///////////////////////////////////////////////////
+  
 void draw() {
   background(0);
 
@@ -395,7 +395,7 @@ void draw() {
   ////////////////// START GAME /////////////////////
   ///////////////////////////////////////////////////
 
-  if ( phase == 0 ) {
+  if ( phaseState == 0 ) {
     textSize(20);
     textAlign(CENTER);
     text("Player 1 : W,S  Player 2 : O,L", width/2, height / 2);
@@ -405,8 +405,7 @@ void draw() {
   /////////////// PHASE 1 START /////////////////////
   ///////////////////////////////////////////////////
 
-
-  if ( phase == 1 && millis()-mytimer > 1500 && millis()-mytimer < 3000 ) {
+  if ( phaseState == 1 && millis()-mytimer > 1500 && millis()-mytimer < 3000 ) {
     textSize(50);
     textAlign(CENTER);
     text("PHASE 1", width/2, height / 3);
@@ -414,25 +413,21 @@ void draw() {
     setPhase1();
   }
 
-  if ( phase == 1 && millis()-mytimer > 3500 ) {
-
+  if ( phaseState == 1 && millis()-mytimer > 3500 ) {
     increaseAndSendA();
-
     if ( ballcount <= 0 ) {
       mytimer = millis();
-      phase = 2;
+      phaseState = 2;
       isCalled = false;
     }
   }
-
   /////////////// PHASE 1 END ///////////////////////
-
 
   ///////////////////////////////////////////////////
   /////////////// PHASE 2 START /////////////////////
   ///////////////////////////////////////////////////
 
-  if ( phase == 2 && millis()-mytimer > 1500 && millis()-mytimer < 3000 ) {
+  if ( phaseState == 2 && millis()-mytimer > 1500 && millis()-mytimer < 3000 ) {
     textSize(50);
     textAlign(CENTER);
     text("PHASE 2", width/2, height / 3);
@@ -440,24 +435,23 @@ void draw() {
     setPhase2();
   }
 
-  if ( phase == 2 && millis()-mytimer > 3500 ) {
+  if ( phaseState == 2 && millis()-mytimer > 3500 ) {
 
     increaseAndSendA();
 
     if ( ballcount <= 0 ) {
       mytimer = millis();
-      phase = 3;
+      phaseState = 3;
       isCalled = false;
     }
   }
-
   /////////////// PHASE 2 END ///////////////////////
 
   ///////////////////////////////////////////////////
   /////////////// PHASE 3 START /////////////////////
   ///////////////////////////////////////////////////
 
-  if ( phase == 3 && millis()-mytimer > 1500 && millis()-mytimer < 3000 ) {
+  if ( phaseState == 3 && millis()-mytimer > 1500 && millis()-mytimer < 3000 ) {
     textSize(50);
     textAlign(CENTER);
     text("PHASE 3", width/2, height / 3);
@@ -465,24 +459,23 @@ void draw() {
     setPhase3();
   }
 
-  if ( phase == 3 && millis()-mytimer > 3500 ) {
+  if ( phaseState == 3 && millis()-mytimer > 3500 ) {
 
     increaseAndSendA();
 
     if ( ballcount <= 15 ) {
       mytimer = millis();
-      phase = 4;
+      phaseState = 4;
       isCalled = false;
     }
   }
-
   /////////////// PHASE 3 END ///////////////////////
 
   ///////////////////////////////////////////////////
   /////////////// PHASE 4 START /////////////////////
   ///////////////////////////////////////////////////
 
-  if ( phase == 4 && millis()-mytimer > 1500 && millis()-mytimer < 3000 ) {
+  if ( phaseState == 4 && millis()-mytimer > 1500 && millis()-mytimer < 3000 ) {
     textSize(50);
     textAlign(CENTER);
     text("PHASE 4", width/2, height / 3);
@@ -490,23 +483,22 @@ void draw() {
     setPhase4();
   }
 
-  if ( phase == 4 && millis()-mytimer > 3500 ) {
+  if ( phaseState == 4 && millis()-mytimer > 3500 ) {
 
     increaseAndSendA();
     if ( ballcount <= 15 ) {
       mytimer = millis();
-      phase = 5;
+      phaseState = 5;
       isCalled = false;
     }
   }
-
   /////////////// PHASE 4 END ///////////////////////
 
   ///////////////////////////////////////////////////
   /////////////// PHASE 5 START /////////////////////
   ///////////////////////////////////////////////////
 
-  if ( phase == 5 && millis()-mytimer > 1500 && millis()-mytimer < 3000 ) {
+  if ( phaseState == 5 && millis()-mytimer > 1500 && millis()-mytimer < 3000 ) {
     textSize(50);
     textAlign(CENTER);
     text("PHASE 5", width/2, height / 3);
@@ -514,24 +506,23 @@ void draw() {
     setPhase5();
   }
 
-  if ( phase == 5 && millis()-mytimer > 3500 ) {
+  if ( phaseState == 5 && millis()-mytimer > 3500 ) {
 
     increaseAndSendA();
 
     if ( ballcount <= 0 ) {
       mytimer = millis();
-      phase = 6;
+      phaseState = 6;
       isCalled = false;
     }
   }
-
   /////////////// PHASE 5 END ///////////////////////
 
   ///////////////////////////////////////////////////
   /////////////// PHASE 6 START /////////////////////
   ///////////////////////////////////////////////////
 
-  if ( phase == 6 && millis()-mytimer > 1500 && millis()-mytimer < 3000 ) {
+  if ( phaseState == 6 && millis()-mytimer > 1500 && millis()-mytimer < 3000 ) {
     textSize(50);
     textAlign(CENTER);
     text("PHASE 6", width/2, height / 3);
@@ -539,17 +530,16 @@ void draw() {
     setPhase6();
   }
 
-  if ( phase == 6 && millis()-mytimer > 3500 ) {
+  if ( phaseState == 6 && millis()-mytimer > 3500 ) {
 
     increaseAndSendA();
 
     if ( ballcount <= 0 ) {
       mytimer = millis();
-      phase = 999;
+      phaseState = 999;
       isCalled = false;
     }
   }
-
   /////////////// PHASE 6 END ///////////////////////
 
 
@@ -558,7 +548,7 @@ void draw() {
   /////////////////// GAME OVER /////////////////////
   ///////////////////////////////////////////////////
 
-  if ( phase == 999 )
+  if ( phaseState == 999 )
   {
     textSize(50);
     textAlign(CENTER);
@@ -568,7 +558,6 @@ void draw() {
       text("PLAYER 2 WIN!", width/2, height / 3);
     else
       text("DRAW!", width/2, height / 3);
-
 
     // Turn off MAX background music
     OscMessage hitPaddleMsg = new OscMessage("/start");
