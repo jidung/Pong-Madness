@@ -5,6 +5,9 @@ A crazy remake of Atari Pong with Processing.
 
 Created by JD Minwong Ji
 
+##Gameplay Video
+* http://www.youtube.com/watch?v=gRBNkuDP2vc
+
 ##How to Run
 1. Download and Install Processing (http://processing.org/download/)
 1. Open Pong_Madness_1_0/Pong_Madness_1.0.pde with Processing
